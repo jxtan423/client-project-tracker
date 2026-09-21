@@ -1,0 +1,51 @@
+name: client-project-tracker
+
+services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "127.0.0.1:4200:80"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--spider", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  backend:
+    build: ./backend
+    environment:
+      PORT: "3000"
+      DATABASE_URL: postgresql://tracker@db:5432/client_project_tracker
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: client_project_tracker
+      POSTGRES_USER: tracker
+      # Password-free authentication is for local development only.
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tracker -d client_project_tracker"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+volumes:
+  postgres_data:
