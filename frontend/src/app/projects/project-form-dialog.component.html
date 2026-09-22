@@ -1,0 +1,44 @@
+<app-dialog [title]="project() ? 'Edit project' : 'Create project'" [subtitle]="project() ? 'Update the details for this client project.' : 'Add a project and keep your client work organized.'" [busy]="saving()" (dismissed)="dismissed.emit()">
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate [attr.aria-busy]="saving()">
+    <div class="dialog-body">
+    @if (errorMessage()) {
+      <div class="error-banner form-error" role="alert">{{ errorMessage() }}</div>
+    }
+    <div class="form-grid">
+      <div class="field full-width">
+        <label for="project-name">Project name <span aria-hidden="true">*</span></label>
+        <input id="project-name" formControlName="name" placeholder="e.g. Website redesign" autocomplete="off" required [attr.aria-invalid]="!!fieldError('name')" [attr.aria-describedby]="fieldError('name') ? 'project-name-error' : 'project-name-hint'" (input)="fieldChanged('name')" />
+        @if (fieldError('name'); as error) {
+          <p class="field-error" id="project-name-error">{{ error }}</p>
+        } @else {
+          <p class="field-hint" id="project-name-hint">Give your project a clear, recognizable name.</p>
+        }
+      </div>
+      <div class="field full-width">
+        <label for="project-client">Client name <span aria-hidden="true">*</span></label>
+        <input id="project-client" formControlName="clientName" placeholder="e.g. Acme Studio" autocomplete="organization" required [attr.aria-invalid]="!!fieldError('clientName')" [attr.aria-describedby]="fieldError('clientName') ? 'project-client-error' : null" (input)="fieldChanged('clientName')" />
+        @if (fieldError('clientName'); as error) { <p class="field-error" id="project-client-error">{{ error }}</p> }
+      </div>
+      <div class="field">
+        <label for="project-status">Status <span aria-hidden="true">*</span></label>
+        <select id="project-status" formControlName="status" required [attr.aria-invalid]="!!fieldError('status')" [attr.aria-describedby]="fieldError('status') ? 'project-status-error' : null" (change)="fieldChanged('status')">
+          <option value="planned">Planned</option>
+          <option value="in_progress">In progress</option>
+          <option value="completed">Completed</option>
+        </select>
+        @if (fieldError('status'); as error) { <p class="field-error" id="project-status-error">{{ error }}</p> }
+      </div>
+      <div class="field">
+        <label for="project-date">Start date <span aria-hidden="true">*</span></label>
+        <input id="project-date" type="date" formControlName="startDate" min="0001-01-01" max="9999-12-31" required [attr.aria-invalid]="!!fieldError('startDate')" [attr.aria-describedby]="fieldError('startDate') ? 'project-date-error' : null" (input)="fieldChanged('startDate')" />
+        @if (fieldError('startDate'); as error) { <p class="field-error" id="project-date-error">{{ error }}</p> }
+      </div>
+    </div>
+    <p class="required-note">* Required fields</p>
+    </div>
+    <div class="dialog-actions">
+      <button type="button" class="button button-secondary" [disabled]="saving()" (click)="dismissed.emit()">Cancel</button>
+      <button type="submit" class="button button-primary" [disabled]="saving()">{{ saving() ? 'Saving…' : project() ? 'Save changes' : 'Create project' }}</button>
+    </div>
+  </form>
+</app-dialog>

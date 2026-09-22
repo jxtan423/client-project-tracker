@@ -1,0 +1,53 @@
+<header class="page-heading">
+  <div>
+    <p class="eyebrow">WORKSPACE / PROJECTS</p>
+    <h1>Projects</h1>
+    <p class="page-description">A clear view of your client work, from first plans to finished projects.</p>
+  </div>
+  <button class="button button-primary create-button" type="button" (click)="createProject()"><span aria-hidden="true">＋</span> Create project</button>
+</header>
+
+<section class="projects-panel" aria-labelledby="project-list-heading" [attr.aria-busy]="loading()">
+  <div class="panel-heading">
+    <div class="panel-title">
+      <h2 id="project-list-heading">All projects</h2>
+      @if (!loading() && !loadError()) { <span class="project-count" [attr.aria-label]="projects().length + ' projects'">{{ projects().length }}</span> }
+    </div>
+    <button type="button" class="button button-secondary button-small" [disabled]="loading()" (click)="refresh()"><span aria-hidden="true">↻</span> Refresh</button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state" role="status">
+      <span class="loading-label">Loading projects…</span>
+      @for (row of [1, 2, 3, 4]; track row) {
+        <div class="skeleton-row" aria-hidden="true"><span class="skeleton"></span><span class="skeleton"></span><span class="skeleton"></span></div>
+      }
+    </div>
+  } @else if (loadError()) {
+    <div class="empty-state" role="alert">
+      <span class="state-icon error-icon" aria-hidden="true">!</span>
+      <h3>Projects couldn't be loaded</h3>
+      <p>{{ loadError() }}</p>
+      <button type="button" class="button button-primary" (click)="refresh()">Try again</button>
+    </div>
+  } @else if (projects().length === 0) {
+    <div class="empty-state">
+      <svg class="empty-icon" width="56" height="56" viewBox="0 0 56 56" fill="none" aria-hidden="true"><rect width="56" height="56" rx="16" fill="#EEF2FF"/><path d="M13 19a3 3 0 0 1 3-3h8l4 4h12a3 3 0 0 1 3 3v15a3 3 0 0 1-3 3H16a3 3 0 0 1-3-3V19Z" stroke="#526FD1" stroke-width="1.7"/><path d="M22 30h12m-6-6v12" stroke="#526FD1" stroke-width="1.7" stroke-linecap="round"/></svg>
+      <h3>Your next project starts here</h3>
+      <p>Create your first project to keep client details, timelines, and progress in one place.</p>
+      <button type="button" class="button button-primary" (click)="createProject()">Create your first project</button>
+    </div>
+  } @else {
+    <app-projects-table [projects]="projects()" (edit)="editProject($event)" (delete)="confirmDelete($event)" />
+    <div class="panel-footer"><span>{{ projects().length }} {{ projects().length === 1 ? 'project' : 'projects' }}</span><span>Task counts refresh whenever this list loads.</span></div>
+  }
+</section>
+
+@if (formOpen()) {
+  <app-project-form-dialog [project]="editingProject()" [saving]="saving()" [errorMessage]="saveError()" [fieldErrors]="fieldErrors()" (saved)="saveProject($event)" (dismissed)="dismissForm()" />
+}
+
+@if (deletingProject(); as project) {
+  <app-confirm-dialog title="Delete project?" [message]="'Delete “' + project.name + '”? This permanently deletes the project, its tasks, and project memberships. This cannot be undone.'" confirmLabel="Delete project" [busy]="deleting()" [error]="deleteError()" (confirmed)="deleteProject()" (dismissed)="dismissDelete()" />
+}
+

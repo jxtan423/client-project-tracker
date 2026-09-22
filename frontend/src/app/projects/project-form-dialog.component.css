@@ -1,0 +1,9 @@
+.form-error { margin-bottom: 22px; }
+.full-width { grid-column: 1 / -1; }
+.field { margin-bottom: 0; }
+.field-error { margin: 0; }
+.field label span { color: #7b8496; }
+.field-hint { margin: 7px 0 0; color: #748198; font-size: 12px; line-height: 1.5; }
+.required-note { margin: 20px 0 0; color: #748198; font-size: 12px; }
+input[aria-invalid="true"], select[aria-invalid="true"] { border-color: #cf5b5b; }
+@media (max-width: 480px) { .form-grid { grid-template-columns: 1fr; } }
