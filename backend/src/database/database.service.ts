@@ -1,5 +1,5 @@
-import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
-import { Pool } from 'pg';
+import { Injectable, InternalServerErrorException, Logger, OnApplicationShutdown, ServiceUnavailableException } from '@nestjs/common';
+import { Pool, QueryResult, QueryResultRow } from 'pg';
 
 @Injectable()
 export class DatabaseService implements OnApplicationShutdown {
@@ -19,6 +19,20 @@ export class DatabaseService implements OnApplicationShutdown {
 
   async checkConnection(): Promise<void> {
     await this.pool.query('SELECT 1');
+  }
+
+  async query<T extends QueryResultRow = QueryResultRow>(sql: string, values: unknown[] = []): Promise<QueryResult<T>> {
+    try {
+      return await this.pool.query<T>(sql, values);
+    } catch (error: unknown) {
+      // Keep SQL, connection strings and PostgreSQL details out of HTTP responses.
+      const code = (error as { code?: string })?.code ?? '';
+      this.logger.error('Database operation failed');
+      if (code.startsWith('08') || ['ECONNREFUSED', 'ECONNRESET', 'ETIMEDOUT', 'EPIPE', '57P01', '57P02', '57P03'].includes(code)) {
+        throw new ServiceUnavailableException('Database unavailable');
+      }
+      throw new InternalServerErrorException('Unable to complete database operation');
+    }
   }
 
   async onApplicationShutdown(): Promise<void> {
