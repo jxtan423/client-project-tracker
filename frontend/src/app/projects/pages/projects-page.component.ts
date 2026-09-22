@@ -2,13 +2,13 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '
 import { HttpErrorResponse } from '@angular/common/http';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { catchError, of, Subject, switchMap, tap } from 'rxjs';
-import { apiError } from '../core/api-error';
-import { ProjectApiService } from '../core/project-api.service';
-import { Project, ProjectInput } from '../core/project.model';
-import { ConfirmDialogComponent } from '../shared/confirm-dialog.component';
-import { ToastService } from '../shared/toast.service';
-import { ProjectFormDialogComponent } from './project-form-dialog.component';
-import { ProjectsTableComponent } from './projects-table.component';
+import { apiError } from '../../core/api-error';
+import { ProjectApiService } from '../../core/project-api.service';
+import { Project, ProjectInput } from '../../core/project.model';
+import { ConfirmDialogComponent } from '../../shared/dialogs/confirm-dialog.component';
+import { ToastService } from '../../shared/toast.service';
+import { ProjectFormDialogComponent } from '../dialogs/project-form-dialog.component';
+import { ProjectsTableComponent } from '../tables/projects-table.component';
 
 @Component({
   selector: 'app-projects-page',

@@ -11,14 +11,14 @@ import {
   catchError,
   finalize,
 } from "rxjs";
-import { ProjectApiService } from "../core/project-api.service";
-import { Project } from "../core/project.model";
-import { Task, TaskInput, TaskApiService } from "../core/task-api.service";
-import { apiError } from "../core/api-error";
-import { ToastService } from "../shared/toast.service";
-import { ConfirmDialogComponent } from "../shared/confirm-dialog.component";
-import { TaskFormDialogComponent } from "./task-form-dialog.component";
-import { TasksTableComponent } from "./tasks-table.component";
+import { ProjectApiService } from "../../core/project-api.service";
+import { Project } from "../../core/project.model";
+import { Task, TaskInput, TaskApiService } from "../../core/task-api.service";
+import { apiError } from "../../core/api-error";
+import { ToastService } from "../../shared/toast.service";
+import { ConfirmDialogComponent } from "../../shared/dialogs/confirm-dialog.component";
+import { TaskFormDialogComponent } from "../dialogs/task-form-dialog.component";
+import { TasksTableComponent } from "../tables/tasks-table.component";
 @Component({
   selector: "app-tasks-page",
   imports: [
@@ -27,78 +27,7 @@ import { TasksTableComponent } from "./tasks-table.component";
     TaskFormDialogComponent,
     TasksTableComponent,
   ],
-  template: `
-    <a class="back-link" routerLink="/projects">← Back to projects</a>
-    @if (project(); as p) {
-      <div class="page-heading">
-        <div>
-          <p class="eyebrow">PROJECT WORKSPACE</p>
-          <h1>{{ p.name }}</h1>
-          <p class="page-description">{{ p.clientName }} / Tasks</p>
-        </div>
-        <button
-          class="button button-primary"
-          [disabled]="loading() || !!error()"
-          (click)="openForm(null)"
-        >
-          + Create task
-        </button>
-      </div>
-    }
-    @if (error()) {
-      <div class="error-banner" role="alert">
-        {{ error() }}
-        <button class="button button-secondary" (click)="reload.next()">
-          Retry
-        </button>
-      </div>
-    }
-    @if (loading()) {
-      <p role="status">Loading tasks…</p>
-    } @else if (project(); as p) {
-      @if (!error()) {
-        <section class="surface">
-          <header class="section-heading">
-            <h2>Project tasks ({{ tasks().length }})</h2>
-            <button class="button button-secondary" (click)="reload.next()">
-              Refresh
-            </button>
-          </header>
-          <app-tasks-table
-            [tasks]="tasks()"
-            [projectName]="p.name"
-            (edit)="openForm($event)"
-            (remove)="openDelete($event)"
-          />
-        </section>
-      }
-      <p class="field-hint">
-        Assignment and filtering will be added in later steps.
-      </p>
-    }
-    @if (formOpen()) {
-      <app-task-form-dialog
-        [task]="editing()"
-        [busy]="busy()"
-        [error]="dialogError()"
-        (saved)="save($event)"
-        (dismissed)="closeDialogs()"
-      />
-    }
-    @if (deleting(); as task) {
-      <app-confirm-dialog
-        title="Delete task?"
-        confirmLabel="Delete task"
-        [message]="
-          'Permanently delete “' + task.title + '”? This cannot be undone.'
-        "
-        [busy]="busy()"
-        [error]="dialogError()"
-        (confirmed)="remove(task)"
-        (dismissed)="closeDialogs()"
-      />
-    }
-  `,
+  templateUrl: './tasks-page.component.html',
 })
 export class TasksPageComponent {
   readonly project = signal<Project | null>(null);

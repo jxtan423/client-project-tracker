@@ -1,8 +1,4 @@
-import { Component, Input, Output, EventEmitter } from "@angular/core";
-import { Task } from "../core/task-api.service";
-@Component({
-  selector: "app-tasks-table",
-  template: ` <div
+<div
     class="table-wrap"
     tabindex="0"
     role="region"
@@ -70,11 +66,4 @@ import { Task } from "../core/task-api.service";
         }
       </tbody>
     </table>
-  </div>`,
-})
-export class TasksTableComponent {
-  @Input() tasks: Task[] = [];
-  @Input() projectName = "";
-  @Output() edit = new EventEmitter<Task>();
-  @Output() remove = new EventEmitter<Task>();
-}
+  </div>

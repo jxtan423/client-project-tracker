@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Project } from '../core/project.model';
+import { Project } from '../../core/project.model';
 
 @Component({
   selector: 'app-projects-table',

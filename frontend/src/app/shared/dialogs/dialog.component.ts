@@ -2,15 +2,7 @@ import { Component, ElementRef, EventEmitter, Input, Output, afterNextRender, vi
 
 @Component({
   selector: 'app-dialog',
-  template: `
-    <dialog #dialog class="dialog" aria-labelledby="dialog-title" (cancel)="cancel($event)">
-      <header class="dialog-header">
-        <div><h2 id="dialog-title">{{ title }}</h2>@if (subtitle) { <p>{{ subtitle }}</p> }</div>
-        <button type="button" class="icon-button" aria-label="Close dialog" [disabled]="busy" (click)="dismissed.emit()">×</button>
-      </header>
-      <ng-content />
-    </dialog>
-  `,
+  templateUrl: './dialog.component.html',
 })
 export class DialogComponent {
   @Input() title = '';

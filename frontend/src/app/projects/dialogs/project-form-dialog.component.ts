@@ -1,14 +1,11 @@
+import { projectTextError } from '../../shared/validation/project-validation';
 import { ChangeDetectionStrategy, Component, effect, input, output, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, ValidatorFn } from '@angular/forms';
-import { Project, ProjectInput } from '../core/project.model';
-import { DialogComponent } from '../shared/dialog.component';
-import { isCalendarDate, projectTextError } from './project-validation';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Project, ProjectInput } from '../../core/project.model';
+import { DialogComponent } from '../../shared/dialogs/dialog.component';
+import { textValidator, projectStatusValidator, calendarDateValidator } from '../../shared/validation/form-validators';
 
 type Field = 'name' | 'clientName' | 'status' | 'startDate';
-const textValidator: ValidatorFn = control => {
-  const message = projectTextError(control.value ?? '');
-  return message ? { projectText: message } : null;
-};
 
 @Component({
   selector: 'app-project-form-dialog',
@@ -32,11 +29,11 @@ export class ProjectFormDialogComponent {
     clientName: new FormControl('', { nonNullable: true, validators: [textValidator] }),
     status: new FormControl<Project['status']>('planned', {
       nonNullable: true,
-      validators: [control => ['planned', 'in_progress', 'completed'].includes(control.value) ? null : { status: true }],
+      validators: [projectStatusValidator],
     }),
     startDate: new FormControl('', {
       nonNullable: true,
-      validators: [control => isCalendarDate(control.value) ? null : { calendarDate: true }],
+      validators: [calendarDateValidator],
     }),
   });
 
