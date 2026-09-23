@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { DatabaseService } from "../database/database.service";
 import { CreateProjectDto, Project, UpdateProjectDto } from "./project.dto";
 
@@ -53,11 +53,19 @@ export class ProjectsService {
       }
     }
     values.push(id);
+    // Check completion in the UPDATE itself so a rejected edit changes no fields.
+    const completionCondition = input.status === "completed"
+      ? " AND NOT EXISTS (SELECT 1 FROM tasks WHERE project_id = projects.id AND status <> 'completed')"
+      : "";
     const result = await this.database.query<Project>(
-      `UPDATE projects SET ${assignments.join(", ")} WHERE id = $${values.length} RETURNING ${PROJECT_COLUMNS}`,
+      `UPDATE projects SET ${assignments.join(", ")} WHERE id = $${values.length}${completionCondition} RETURNING ${PROJECT_COLUMNS}`,
       values,
     );
-    if (!result.rows[0]) throw new NotFoundException("Project not found");
+    if (!result.rows[0]) {
+      // Preserve 404 for a missing project; an existing project failed the completion rule.
+      await this.findOne(id);
+      throw new ConflictException("Complete all tasks before completing this project.");
+    }
     return result.rows[0];
   }
 
