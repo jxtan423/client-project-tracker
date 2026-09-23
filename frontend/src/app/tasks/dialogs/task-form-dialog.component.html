@@ -48,7 +48,7 @@
         >
           Cancel</button
         ><button type="submit" class="button button-primary" [disabled]="busy">
-          {{ busy ? "Saving…" : "Save task" }}
+          @if (busy) { <span class="spinner spinner-small" aria-hidden="true"></span> } {{ busy ? "Saving…" : "Save task" }}
         </button>
       </footer>
     </form></app-dialog

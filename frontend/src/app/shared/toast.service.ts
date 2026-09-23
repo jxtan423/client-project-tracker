@@ -12,6 +12,6 @@ export class ToastService {
   private show(kind: 'success' | 'error', message: string) {
     const id = ++this.sequence;
     this.messages.update(messages => [...messages.slice(-2), { id, kind, message }]);
-    if (kind === 'success') setTimeout(() => this.dismiss(id), 6000);
+    setTimeout(() => this.dismiss(id), 3000);
   }
 }

@@ -3,8 +3,8 @@
   <h1 id="login-title">Welcome back</h1>
   <p class="page-description">Sign in to manage your projects and tasks.</p>
   <form (ngSubmit)="submit()" novalidate [attr.aria-busy]="busy()">
-    <label class="field" for="login-username"
-      >Username
+    <label class="field" for="login-username">
+      Username
       <input
         id="login-username"
         name="username"
@@ -16,8 +16,8 @@
         spellcheck="false"
       />
     </label>
-    <label class="field" for="login-password"
-      >Password
+    <label class="field" for="login-password">
+      Password
       <input
         id="login-password"
         name="password"
@@ -36,6 +36,9 @@
       type="submit"
       [disabled]="busy()"
     >
+      @if (busy()) { 
+        <span class="spinner spinner-small" aria-hidden="true"></span> 
+      } 
       {{ busy() ? "Signing in…" : "Sign in" }}
     </button>
   </form>

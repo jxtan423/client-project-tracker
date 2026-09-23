@@ -29,16 +29,49 @@
         @if (fieldError('status'); as error) { <p class="field-error" id="project-status-error">{{ error }}</p> }
       </div>
       <div class="field">
-        <label for="project-date">Start date <span aria-hidden="true">*</span></label>
-        <input id="project-date" type="date" formControlName="startDate" min="0001-01-01" max="9999-12-31" required [attr.aria-invalid]="!!fieldError('startDate')" [attr.aria-describedby]="fieldError('startDate') ? 'project-date-error' : null" (input)="fieldChanged('startDate')" />
-        @if (fieldError('startDate'); as error) { <p class="field-error" id="project-date-error">{{ error }}</p> }
+        <label for="project-date">
+          Start date 
+          <span aria-hidden="true">*</span>
+        </label>
+        <input 
+          id="project-date"
+          type="date"
+          formControlName="startDate"
+          min="0001-01-01"
+          max="9999-12-31" 
+          required
+          [attr.aria-invalid]="!!fieldError('startDate')"
+          [attr.aria-describedby]="fieldError('startDate') ? 'project-date-error' : null"
+          (input)="fieldChanged('startDate')"
+        />
+        @if (fieldError('startDate'); as error) { 
+          <p class="field-error" id="project-date-error">
+            {{ error }}
+          </p> 
+        }
       </div>
     </div>
     <p class="required-note">* Required fields</p>
     </div>
     <div class="dialog-actions">
-      <button type="button" class="button button-secondary" [disabled]="saving()" (click)="dismissed.emit()">Cancel</button>
-      <button type="submit" class="button button-primary" [disabled]="saving()">{{ saving() ? 'Saving…' : project() ? 'Save changes' : 'Create project' }}</button>
+      <button 
+        type="button" 
+        class="button button-secondary" 
+        [disabled]="saving()" 
+        (click)="dismissed.emit()"
+      >
+        Cancel
+      </button>
+      <button 
+        type="submit" 
+        class="button button-primary"
+        [disabled]="saving()"
+      >
+        @if (saving()) { 
+          <span class="spinner spinner-small" aria-hidden="true"></span> 
+        }
+        {{ saving() ? 'Saving…' : project() ? 'Save changes' : 'Create project' }}
+      </button>
     </div>
   </form>
 </app-dialog>

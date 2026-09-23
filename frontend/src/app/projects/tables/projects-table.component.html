@@ -1,11 +1,19 @@
-<div class="table-wrap" tabindex="0" role="region" aria-label="Projects table, scroll horizontally for more columns">
+<div
+  class="table-wrap"
+  tabindex="0"
+  role="region"
+  aria-label="Projects table, scroll horizontally for more columns"
+>
   <table class="data-table">
-    <caption class="visually-hidden">Projects and their client, status, start date, and available actions</caption>
+    <caption class="visually-hidden">
+      Projects and their client, status, start date, and available actions
+    </caption>
     <thead>
       <tr>
         <th scope="col">Project name</th>
         <th scope="col">Client</th>
         <th scope="col">Status</th>
+        <th scope="col">Complete</th>
         <th scope="col">Start date</th>
         <th scope="col" class="count-column">Task count</th>
         <th scope="col">Tasks</th>
@@ -18,23 +26,70 @@
           <th scope="row" class="project-name">{{ project.name }}</th>
           <td class="client-name">{{ project.clientName }}</td>
           <td>
-            <span class="status-badge" [class]="'status-badge ' + project.status">
-              <span class="status-dot" aria-hidden="true"></span>{{ statusLabel(project.status) }}
+            <span
+              class="status-badge"
+              [class]="'status-badge ' + project.status"
+            >
+              <span class="status-dot" aria-hidden="true"></span
+              >{{ statusLabel(project.status) }}
             </span>
           </td>
-          <td class="date-column"><time [attr.datetime]="project.startDate">{{ project.startDate }}</time></td>
+          <td>
+            <input
+              #completion
+              type="checkbox"
+              [checked]="project.status === 'completed'"
+              [disabled]="project.status === 'completed'"
+              [attr.aria-label]="'Mark ' + project.name + ' completed'"
+              (change)="
+                completion.checked = project.status === 'completed';
+                complete.emit(project)
+              "
+            />
+          </td>
+          <td class="date-column">
+            <time [attr.datetime]="project.startDate">{{
+              project.startDate
+            }}</time>
+          </td>
           <td class="count-column">
             @if (project.taskCount !== undefined) {
               {{ project.taskCount }}
             } @else {
-              <span class="unavailable-count" aria-label="Task count unavailable" title="Task counts will be available when task management is connected">—</span>
+              <span
+                class="unavailable-count"
+                aria-label="Task count unavailable"
+                title="Task counts will be available when task management is connected"
+                >—</span
+              >
             }
           </td>
-          <td><a class="tasks-link" [routerLink]="['/projects', project.id, 'tasks']" [attr.aria-label]="'View tasks for ' + project.name">View tasks <span aria-hidden="true">↗</span></a></td>
+          <td>
+            <a
+              class="tasks-link"
+              [routerLink]="['/projects', project.id, 'tasks']"
+              [attr.aria-label]="'View tasks for ' + project.name"
+              >View tasks <span aria-hidden="true">↗</span></a
+            >
+          </td>
           <td>
             <div class="row-actions">
-              <button type="button" class="button button-secondary button-small" [attr.aria-label]="'Edit ' + project.name" (click)="edit.emit(project)">Edit</button>
-              <button type="button" class="button button-small delete-action" [attr.aria-label]="'Delete ' + project.name" (click)="delete.emit(project)">Delete</button>
+              <button
+                type="button"
+                class="button button-secondary button-small"
+                [attr.aria-label]="'Edit ' + project.name"
+                (click)="edit.emit(project)"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                class="button button-small delete-action"
+                [attr.aria-label]="'Delete ' + project.name"
+                (click)="delete.emit(project)"
+              >
+                Delete
+              </button>
             </div>
           </td>
         </tr>

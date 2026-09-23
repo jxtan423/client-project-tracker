@@ -27,7 +27,7 @@ import { TasksTableComponent } from "../tables/tasks-table.component";
     TaskFormDialogComponent,
     TasksTableComponent,
   ],
-  templateUrl: './tasks-page.component.html',
+  templateUrl: "./tasks-page.component.html",
 })
 export class TasksPageComponent {
   readonly project = signal<Project | null>(null);
@@ -36,6 +36,7 @@ export class TasksPageComponent {
   readonly error = signal("");
   readonly formOpen = signal(false);
   readonly editing = signal<Task | null>(null);
+  readonly completing = signal<Task | null>(null);
   readonly deleting = signal<Task | null>(null);
   readonly busy = signal(false);
   readonly dialogError = signal("");
@@ -64,6 +65,7 @@ export class TasksPageComponent {
             this.project.set(null);
             this.formOpen.set(false);
             this.deleting.set(null);
+            this.completing.set(null);
           }
           return forkJoin({
             project: this.projects.get(Number(id)),
@@ -85,6 +87,20 @@ export class TasksPageComponent {
         }
       });
   }
+  openComplete(task: Task) {
+    if (this.busy() || task.status === "completed") return;
+    this.dialogError.set("");
+    this.completing.set(task);
+  }
+  completeTask() {
+    const project = this.project(),
+      task = this.completing();
+    if (!project || !task || this.busy()) return;
+    this.mutate(
+      this.api.update(project.id, task.id, { status: "completed" }),
+      "Task completed.",
+    );
+  }
   openForm(task: Task | null) {
     this.editing.set(task);
     this.dialogError.set("");
@@ -98,6 +114,7 @@ export class TasksPageComponent {
     if (!this.busy()) {
       this.formOpen.set(false);
       this.deleting.set(null);
+      this.completing.set(null);
     }
   }
   save(input: TaskInput) {
@@ -128,6 +145,7 @@ export class TasksPageComponent {
         next: () => {
           this.formOpen.set(false);
           this.deleting.set(null);
+          this.completing.set(null);
           this.toast.success(message);
           this.reload.next();
         },

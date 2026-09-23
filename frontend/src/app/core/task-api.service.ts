@@ -28,7 +28,7 @@ export class TaskApiService {
   create(p: number, input: TaskInput) {
     return this.http.post<Task>(this.url(p), input).pipe(timeout(15000));
   }
-  update(p: number, id: number, input: TaskInput) {
+  update(p: number, id: number, input: Partial<TaskInput>) {
     return this.http
       .patch<Task>(`${this.url(p)}/${id}`, input)
       .pipe(timeout(15000));
