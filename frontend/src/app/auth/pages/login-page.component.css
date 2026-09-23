@@ -1,0 +1,30 @@
+:host {
+  display: block;
+}
+.login-card {
+  max-width: 440px;
+  margin: 36px auto;
+  padding: 32px;
+}
+h1 {
+  margin: 0 0 12px;
+}
+form {
+  margin-top: 28px;
+}
+.login-button {
+  width: 100%;
+  margin-top: 12px;
+}
+.session-note {
+  font-size: 0.85rem;
+  color: var(--muted, #617080);
+  line-height: 1.6;
+  margin: 24px 0 0;
+}
+@media (max-width: 520px) {
+  .login-card {
+    padding: 24px;
+    margin: 12px auto;
+  }
+}

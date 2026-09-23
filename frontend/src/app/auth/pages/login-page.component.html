@@ -1,0 +1,45 @@
+<section class="login-card surface" aria-labelledby="login-title">
+  <p class="eyebrow">CLIENT PROJECT TRACKER</p>
+  <h1 id="login-title">Welcome back</h1>
+  <p class="page-description">Sign in to manage your projects and tasks.</p>
+  <form (ngSubmit)="submit()" novalidate [attr.aria-busy]="busy()">
+    <label class="field" for="login-username"
+      >Username
+      <input
+        id="login-username"
+        name="username"
+        [(ngModel)]="username"
+        autocomplete="username"
+        required
+        [disabled]="busy()"
+        autocapitalize="none"
+        spellcheck="false"
+      />
+    </label>
+    <label class="field" for="login-password"
+      >Password
+      <input
+        id="login-password"
+        name="password"
+        type="password"
+        [(ngModel)]="password"
+        autocomplete="current-password"
+        required
+        [disabled]="busy()"
+      />
+    </label>
+    @if (error()) {
+      <p class="error-banner" role="alert">{{ error() }}</p>
+    }
+    <button
+      class="button button-primary login-button"
+      type="submit"
+      [disabled]="busy()"
+    >
+      {{ busy() ? "Signing in…" : "Sign in" }}
+    </button>
+  </form>
+  <p class="session-note">
+    Your session lasts up to 15 minutes. Refreshing the page signs you out.
+  </p>
+</section>
