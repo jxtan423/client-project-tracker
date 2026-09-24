@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "test": "node --test src/app/shared/validation/*.test.cjs test/*.test.cjs",
     "watch": "ng build --watch --configuration development"
   },
   "private": true,
