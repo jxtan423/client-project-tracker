@@ -38,7 +38,7 @@ test('migrations initialize an empty database, preserve data on rerun, and enfor
     await assert.rejects(db.query('DELETE FROM project_members WHERE project_id = $1 AND user_id = $2', [project, user]), { code: '23503' });
     migrate();
     assert.equal((await db.query('SELECT count(*)::int AS count FROM tasks')).rows[0].count, 2);
-    assert.equal((await db.query('SELECT count(*)::int AS count FROM schema_migrations')).rows[0].count, 1);
+    assert.equal((await db.query('SELECT count(*)::int AS count FROM schema_migrations')).rows[0].count, 3);
     assert.equal((await db.query('SELECT version FROM tasks LIMIT 1')).rows[0].version, 1);
     await db.query('DELETE FROM projects WHERE id = $1', [project]);
     assert.equal((await db.query('SELECT count(*)::int AS count FROM tasks')).rows[0].count, 0);

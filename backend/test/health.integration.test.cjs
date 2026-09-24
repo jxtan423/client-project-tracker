@@ -1,10 +1,18 @@
 require('reflect-metadata');
-const { test } = require('node:test');
+const { after, test } = require('node:test');
 const assert = require('node:assert/strict');
+const { randomBytes } = require('node:crypto');
 const { NestFactory } = require('@nestjs/core');
+const originalSecret = process.env.JWT_SECRET;
+process.env.JWT_SECRET = randomBytes(32).toString('hex');
 const { AppModule } = require('../dist/app.module');
 
-test('health confirms a query against the real PostgreSQL database', async () => {
+after(() => {
+  if (originalSecret === undefined) delete process.env.JWT_SECRET;
+  else process.env.JWT_SECRET = originalSecret;
+});
+
+test('public health confirms a database query without requiring a bearer token', async () => {
   const app = await NestFactory.create(AppModule, { logger: false });
   try {
     await app.listen(0, '127.0.0.1');
