@@ -1,11 +1,12 @@
-import { Injectable, inject, signal } from "@angular/core";
+import { Injectable, computed, inject, signal } from "@angular/core";
 import { Router } from "@angular/router";
 import { ToastService } from "../../shared/toast.service";
+import { AppUser } from "../../core/user.model";
 export interface LoginResponse {
   accessToken: string;
   tokenType: "Bearer";
   expiresIn: number;
-  user: { id: number; name: string; username: string };
+  user: AppUser;
 }
 @Injectable({ providedIn: "root" })
 export class AuthSessionService {
@@ -13,6 +14,8 @@ export class AuthSessionService {
   private readonly toasts = inject(ToastService);
   private readonly currentUser = signal<LoginResponse["user"] | null>(null);
   readonly user = this.currentUser.asReadonly();
+  // Presentation only: the API rechecks the user's current role and membership.
+  readonly isAdmin = computed(() => this.currentUser()?.role === "admin");
   private accessToken: string | null = null;
   private expiresAt = 0;
   private timer: ReturnType<typeof setTimeout> | undefined;
@@ -25,7 +28,8 @@ export class AuthSessionService {
       !Number.isFinite(response.expiresIn) ||
       response.expiresIn <= 0 ||
       response.expiresIn > 86400 ||
-      !response.user?.id
+      !response.user?.id ||
+      !["admin", "user"].includes(response.user.role)
     )
       throw new Error("Invalid login response");
     this.clear();

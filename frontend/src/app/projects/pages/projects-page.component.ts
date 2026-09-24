@@ -15,6 +15,8 @@ import { ConfirmDialogComponent } from "../../shared/dialogs/confirm-dialog.comp
 import { ToastService } from "../../shared/toast.service";
 import { ProjectFormDialogComponent } from "../dialogs/project-form-dialog.component";
 import { ProjectsTableComponent } from "../tables/projects-table.component";
+import { AuthSessionService } from "../../auth/services/auth-session.service";
+import { ProjectMembersDialogComponent } from "../dialogs/project-members-dialog.component";
 
 @Component({
   selector: "app-projects-page",
@@ -22,12 +24,14 @@ import { ProjectsTableComponent } from "../tables/projects-table.component";
     ProjectsTableComponent,
     ProjectFormDialogComponent,
     ConfirmDialogComponent,
+    ProjectMembersDialogComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: "./projects-page.component.html",
   styleUrl: "./projects-page.component.css",
 })
 export class ProjectsPageComponent {
+  readonly auth = inject(AuthSessionService);
   private readonly api = inject(ProjectApiService);
   private readonly toast = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
@@ -47,6 +51,7 @@ export class ProjectsPageComponent {
   readonly deletingProject = signal<Project | null>(null);
   readonly deleting = signal(false);
   readonly deleteError = signal("");
+  readonly managingMembers = signal<Project | null>(null);
 
   constructor() {
     // A later refresh cancels an earlier request, so stale lists cannot win a race.
@@ -176,7 +181,7 @@ export class ProjectsPageComponent {
   }
 
   confirmDelete(project: Project): void {
-    if (this.saving() || this.deleting()) return;
+    if (project.canDelete !== true || this.saving() || this.deleting()) return;
     this.deleteError.set("");
     this.deletingProject.set(project);
   }
@@ -187,7 +192,7 @@ export class ProjectsPageComponent {
 
   deleteProject(): void {
     const project = this.deletingProject();
-    if (!project || this.deleting()) return;
+    if (!project || project.canDelete !== true || this.deleting()) return;
     this.deleting.set(true);
     this.deleteError.set("");
     this.api
@@ -212,5 +217,15 @@ export class ProjectsPageComponent {
           this.toast.error(message);
         },
       });
+  }
+
+  manageMembers(project: Project): void {
+    if (!this.auth.isAdmin()) return;
+    this.managingMembers.set(project);
+  }
+
+  dismissMembers(): void {
+    this.managingMembers.set(null);
+    this.refresh();
   }
 }

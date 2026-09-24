@@ -1,0 +1,62 @@
+<app-dialog title="Manage members" [subtitle]="project().name" [busy]="busy()" (dismissed)="close()">
+  <div class="dialog-body members-body" [attr.aria-busy]="loading() || busy()">
+    <p class="access-note">Members can edit this project and its tasks. Administrators can access every project.</p>
+
+    @if (loading()) {
+      <p class="loading-members" role="status"><span class="spinner" aria-hidden="true"></span> Loading members…</p>
+    } @else if (loadError()) {
+      <div class="error-banner" role="alert">{{ loadError() }}</div>
+      <button type="button" class="button button-secondary retry-button" (click)="load()">Try again</button>
+    } @else {
+      @if (mutationError()) {
+        <div class="error-banner mutation-error" role="alert">{{ mutationError() }}</div>
+      }
+
+      <form class="add-member-form" (ngSubmit)="addMember()" novalidate>
+        <div class="field">
+          <label for="project-member-user">Add an existing user</label>
+          <select id="project-member-user" name="userId" [(ngModel)]="selectedUserId" [disabled]="busy() || availableUsers().length === 0" aria-describedby="member-user-help">
+            <option [ngValue]="null">Choose a user</option>
+            @for (user of availableUsers(); track user.id) {
+              <option [ngValue]="user.id">{{ user.name }} ({{ user.username }})</option>
+            }
+          </select>
+        </div>
+        <button type="submit" class="button button-primary" [disabled]="busy() || selectedUserId === null">
+          @if (pendingAction() === 'add') { <span class="spinner spinner-small" aria-hidden="true"></span> }
+          {{ pendingAction() === 'add' ? 'Adding…' : 'Add member' }}
+        </button>
+      </form>
+      <p id="member-user-help" class="member-help">{{ availableUsers().length === 0 ? 'No additional non-admin users are available.' : 'Choose an existing non-admin user account.' }}</p>
+
+      <div class="member-list-heading">
+        <h3>Project members <span>({{ members().length }})</span></h3>
+        <button type="button" class="button button-secondary button-small" [disabled]="busy()" (click)="load()">Refresh</button>
+      </div>
+      <ul class="member-list" aria-label="Current project members">
+        @for (member of members(); track member.id) {
+          <li>
+            <div class="member-details">
+              <strong>{{ member.name }}</strong>
+              <span class="member-username">{{ member.username }}</span>
+              <div class="member-labels">
+                @if (member.id === project().createdBy) { <span class="member-tag">Creator</span> }
+                @if (member.role === 'admin') { <span class="member-tag">Admin</span> }
+              </div>
+            </div>
+            <button type="button" class="button button-secondary button-small remove-member" [disabled]="busy() || member.id === project().createdBy" [attr.aria-label]="'Remove ' + member.name + ' from this project'" [attr.title]="member.id === project().createdBy ? 'The project creator cannot be removed.' : null" (click)="removeMember(member)">
+              @if (removingUserId() === member.id) { <span class="spinner spinner-small" aria-hidden="true"></span> }
+              {{ removingUserId() === member.id ? 'Removing…' : 'Remove' }}
+            </button>
+          </li>
+        } @empty {
+          <li class="no-members">No members have been added to this project.</li>
+        }
+      </ul>
+      <p class="member-help">The project creator cannot be removed. Assigned tasks must be unassigned before removing a member.</p>
+    }
+  </div>
+  <footer class="dialog-actions">
+    <button type="button" class="button button-secondary" [disabled]="busy()" (click)="close()">Close</button>
+  </footer>
+</app-dialog>

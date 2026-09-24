@@ -57,7 +57,7 @@ main:focus { outline: none; }
 .empty-icon { margin: auto; background: #f0f5f7; color: #5a7e90; font-size: 30px; width: 62px; height: 62px; display: grid; place-items: center; border-radius: 16px; }
 .error-banner { background: #fff0ef; color: #9c343a; padding: 14px 16px; border: 1px solid #f3d6d5; border-radius: 6px; font-size: 13px; line-height: 1.6; }
 .error-banner a { color: inherit; }
-.back-link { display: inline-block; font-size: 12px; text-decoration: none; color: #637c8d; margin-bottom: 30px; }
+.back-link { display: inline-block; font-size: 16px; text-decoration: none; color: #637c8d; margin-bottom: 30px; }
 .back-link:hover { text-decoration: underline; }
 .notice-banner { background: #eef4f7; border: 1px solid #dce7ee; color: #496578; display: flex; gap: 15px; padding: 20px; border-radius: 8px; margin-bottom: 26px; align-items: flex-start; }
 .notice-banner strong { font-size: 13px; color: #355369; }

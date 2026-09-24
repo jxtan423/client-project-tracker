@@ -1,0 +1,25 @@
+.access-note { margin-bottom: 24px; }
+.loading-members { display: flex; align-items: center; gap: 10px; }
+.retry-button { margin-top: 16px; }
+.mutation-error { margin-bottom: 20px; }
+.add-member-form { display: flex; align-items: flex-end; gap: 12px; }
+.add-member-form .field { flex: 1; min-width: 0; margin-bottom: 0; }
+.add-member-form select { width: 100%; }
+.member-help { margin: 10px 0 0; font-size: 12px; font-weight: 400; line-height: 1.6; color: var(--muted); }
+.member-list-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-top: 28px; }
+.member-list-heading h3 { margin: 0; font-size: 15px; }
+.member-list-heading h3 span { color: var(--muted); font-weight: 400; }
+.member-list { list-style: none; margin: 14px 0; padding: 0; border: 1px solid var(--border); border-radius: 8px; }
+.member-list li { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 14px; }
+.member-list li + li { border-top: 1px solid var(--border); }
+.member-details { min-width: 0; overflow-wrap: anywhere; }
+.member-details strong { display: block; font-size: 13px; font-weight: 600; }
+.member-username { display: block; color: var(--muted); font-size: 12px; margin-top: 4px; }
+.member-labels { display: flex; flex-wrap: wrap; gap: 5px; }
+.member-tag { margin-top: 7px; background: #edf3f6; color: #496578; padding: 3px 6px; border-radius: 4px; font-size: 10px; }
+.remove-member { color: var(--danger); }
+.no-members { color: var(--muted); font-size: 13px; }
+@media (max-width: 480px) {
+  .add-member-form { align-items: stretch; flex-direction: column; }
+  .member-list li { padding: 12px; gap: 10px; }
+}

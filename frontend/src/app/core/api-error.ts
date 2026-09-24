@@ -11,6 +11,9 @@ export function apiError(error: unknown): { message: string; fields: Record<stri
   if (error.status === 0) {
     return { message: 'Cannot reach the server. Check your connection and try again.', fields: {} };
   }
+  if (error.status === 403) {
+    return { message: 'You do not have permission to perform this action. Your access may have changed.', fields: {} };
+  }
   const body = error.error;
   const fields: Record<string, string[]> = Object.create(null);
   if (body && typeof body === 'object' && body.errors && typeof body.errors === 'object') {

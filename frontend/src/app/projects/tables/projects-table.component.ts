@@ -16,6 +16,8 @@ import { Project } from "../../core/project.model";
 })
 export class ProjectsTableComponent {
   readonly projects = input.required<Project[]>();
+  readonly isAdmin = input(false);
+  readonly members = output<Project>();
   readonly complete = output<Project>();
   readonly edit = output<Project>();
   readonly delete = output<Project>();

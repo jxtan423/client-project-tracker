@@ -12,6 +12,8 @@ export interface Project extends ProjectInput {
   status: ProjectStatus;
   createdAt: string;
   updatedAt: string;
-  // Not returned by the current backend. Never substitute a made-up zero.
+  createdBy: number | null;
+  canDelete: boolean;
+  // Use the server count; missing data must not be shown as a made-up zero.
   taskCount?: number;
 }

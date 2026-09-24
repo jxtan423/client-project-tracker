@@ -59,7 +59,7 @@
               <span
                 class="unavailable-count"
                 aria-label="Task count unavailable"
-                title="Task counts will be available when task management is connected"
+                title="Task count is unavailable. Refresh the project list."
                 >—</span
               >
             }
@@ -82,14 +82,26 @@
               >
                 Edit
               </button>
-              <button
-                type="button"
-                class="button button-small delete-action"
-                [attr.aria-label]="'Delete ' + project.name"
-                (click)="delete.emit(project)"
-              >
-                Delete
-              </button>
+              @if (isAdmin()) {
+                <button
+                  type="button"
+                  class="button button-secondary button-small"
+                  [attr.aria-label]="'Manage members for ' + project.name"
+                  (click)="members.emit(project)"
+                >
+                  Manage members
+                </button>
+              }
+              @if (project.canDelete === true) {
+                <button
+                  type="button"
+                  class="button button-small delete-action"
+                  [attr.aria-label]="'Delete ' + project.name"
+                  (click)="delete.emit(project)"
+                >
+                  Delete
+                </button>
+              }
             </div>
           </td>
         </tr>
