@@ -1,3 +1,5 @@
+import { UseGuards } from '@nestjs/common';
+import { ProjectAccessGuard } from '../access/guards/project-access.guard';
 import {
   Body,
   Controller,
@@ -12,6 +14,7 @@ import { ProjectIdPipe } from "../projects/project.dto";
 import { TaskBodyPipe, TaskInput } from "./task.dto";
 import { TasksService } from "./tasks.service";
 @Controller("projects/:projectId/tasks")
+@UseGuards(ProjectAccessGuard)
 export class TasksController {
   constructor(private readonly tasks: TasksService) {}
   @Get() list(@Param("projectId", ProjectIdPipe) p: number) {

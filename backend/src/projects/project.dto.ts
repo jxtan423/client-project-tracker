@@ -19,6 +19,8 @@ export type UpdateProjectDto = Partial<CreateProjectDto>;
 export interface Project extends CreateProjectDto {
   id: number;
   taskCount: number;
+  createdBy: number | null;
+  canDelete: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

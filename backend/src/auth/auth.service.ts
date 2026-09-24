@@ -5,7 +5,7 @@ import { verifyPassword } from './security/password';
 import { TokenService } from './token.service';
 import { TOKEN_LIFETIME_SECONDS } from './auth.config';
 
-interface LoginUser { id: number; name: string; username: string; password_hash: string }
+interface LoginUser { id: number; name: string; username: string; password_hash: string; role: 'admin' | 'user' }
 
 @Injectable()
 export class AuthService {
@@ -18,14 +18,14 @@ export class AuthService {
     this.activeLogins++;
     try {
       const result = await this.database.query<LoginUser>(
-        'SELECT id, name, username, password_hash FROM users WHERE lower(username) = lower($1)', [input.username],
+        'SELECT id, name, username, password_hash, role FROM users WHERE lower(username) = lower($1)', [input.username],
       );
       const user = result.rows[0];
       const valid = await verifyPassword(input.password, user?.password_hash ?? null);
       if (!user || !valid) throw new UnauthorizedException('Invalid username or password.');
       return {
         accessToken: this.tokens.issue(user.id), tokenType: 'Bearer', expiresIn: TOKEN_LIFETIME_SECONDS,
-        user: { id: user.id, name: user.name, username: user.username },
+        user: { id: user.id, name: user.name, username: user.username, role: user.role },
       };
     } finally {
       this.activeLogins--;
