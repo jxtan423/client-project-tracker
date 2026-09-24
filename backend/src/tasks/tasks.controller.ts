@@ -1,5 +1,6 @@
 import { UseGuards } from '@nestjs/common';
 import { ProjectAccessGuard } from '../access/guards/project-access.guard';
+import { VersionQueryPipe } from '../common/validation/version';
 import {
   Body,
   Controller,
@@ -9,9 +10,10 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from "@nestjs/common";
 import { ProjectIdPipe } from "../projects/project.dto";
-import { TaskBodyPipe, TaskInput } from "./task.dto";
+import { TaskBodyPipe, TaskInput, UpdateTaskDto } from "./task.dto";
 import { TasksService } from "./tasks.service";
 @Controller("projects/:projectId/tasks")
 @UseGuards(ProjectAccessGuard)
@@ -35,14 +37,15 @@ export class TasksController {
   @Patch(":taskId") update(
     @Param("projectId", ProjectIdPipe) p: number,
     @Param("taskId", ProjectIdPipe) id: number,
-    @Body(new TaskBodyPipe(true)) body: Partial<TaskInput>,
+    @Body(new TaskBodyPipe(true)) body: UpdateTaskDto,
   ) {
     return this.tasks.update(p, id, body);
   }
   @Delete(":taskId") @HttpCode(204) remove(
     @Param("projectId", ProjectIdPipe) p: number,
     @Param("taskId", ProjectIdPipe) id: number,
+    @Query('version', VersionQueryPipe) version: number,
   ) {
-    return this.tasks.remove(p, id);
+    return this.tasks.remove(p, id, version);
   }
 }

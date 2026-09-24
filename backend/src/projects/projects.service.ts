@@ -3,9 +3,10 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { DatabaseService } from "../database/database.service";
 import { CreateProjectDto, Project, UpdateProjectDto } from "./project.dto";
+import { versionConflict } from '../common/version-conflict';
 
 // A date is returned as text so pg never converts it to a timezone-sensitive JS Date.
-const PROJECT_COLUMNS = `created_by AS "createdBy", id, name, client_name AS "clientName", status,
+const PROJECT_COLUMNS = `version, created_by AS "createdBy", id, name, client_name AS "clientName", status,
   to_char(start_date, 'YYYY-MM-DD') AS "startDate",
   created_at AS "createdAt", updated_at AS "updatedAt", (SELECT count(*)::int FROM tasks WHERE project_id = projects.id) AS "taskCount"`;
 
@@ -57,36 +58,39 @@ export class ProjectsService {
       startDate: "start_date",
     } as const;
     const assignments: string[] = [];
-    const values: unknown[] = [];
-    for (const field of Object.keys(columns) as (keyof UpdateProjectDto)[]) {
+    const values: unknown[] = [id, input.version];
+    for (const field of Object.keys(columns) as (keyof CreateProjectDto)[]) {
       if (input[field] !== undefined) {
         values.push(input[field]);
         assignments.push(`${columns[field]} = $${values.length}`);
       }
     }
-    values.push(id);
     // Check completion in the UPDATE itself so a rejected edit changes no fields.
     const completionCondition = input.status === "completed"
       ? " AND NOT EXISTS (SELECT 1 FROM tasks WHERE project_id = projects.id AND status <> 'completed')"
       : "";
     const result = await this.database.query<Project>(
-      `UPDATE projects SET ${assignments.join(", ")} WHERE id = $${values.length}${completionCondition} RETURNING ${PROJECT_COLUMNS}`,
+      `UPDATE projects SET ${assignments.join(", ")} WHERE id = $1 AND version = $2${completionCondition} RETURNING ${PROJECT_COLUMNS}`,
       values,
     );
     if (!result.rows[0]) {
-      // Preserve 404 for a missing project; an existing project failed the completion rule.
-      await this.findOne(id, user);
+      // A separate read explains a rejected write; it never authorizes a retry.
+      const current = await this.findOne(id, user);
+      if (current.version !== input.version) versionConflict('Project');
       throw new ConflictException("Complete all tasks before completing this project.");
     }
     return this.permissions(result.rows[0], user);
   }
 
-  async remove(id: number, user: CurrentUser): Promise<void> {
+  async remove(id: number, version: number, user: CurrentUser): Promise<void> {
     await this.access.requireProject(id, user, true);
     const result = await this.database.query(
-      "DELETE FROM projects WHERE id = $1",
-      [id],
+      "DELETE FROM projects WHERE id = $1 AND version = $2",
+      [id, version],
     );
-    if (result.rowCount === 0) throw new NotFoundException("Project not found");
+    if (result.rowCount === 0) {
+      await this.findOne(id, user);
+      versionConflict('Project');
+    }
   }
 }

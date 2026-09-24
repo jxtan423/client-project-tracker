@@ -9,6 +9,7 @@ export interface ProjectInput {
 
 export interface Project extends ProjectInput {
   id: number;
+  version: number;
   status: ProjectStatus;
   createdAt: string;
   updatedAt: string;

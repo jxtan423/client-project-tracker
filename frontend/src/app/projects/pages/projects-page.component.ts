@@ -8,7 +8,7 @@ import {
 import { HttpErrorResponse } from "@angular/common/http";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { catchError, of, Subject, switchMap, tap } from "rxjs";
-import { apiError } from "../../core/api-error";
+import { apiError, EDIT_CONFLICT_MESSAGE, isVersionConflict } from "../../core/api-error";
 import { ProjectApiService } from "../../core/project-api.service";
 import { Project, ProjectInput } from "../../core/project.model";
 import { ConfirmDialogComponent } from "../../shared/dialogs/confirm-dialog.component";
@@ -109,7 +109,7 @@ export class ProjectsPageComponent {
     this.saveError.set("");
     this.fieldErrors.set({});
     const request = project
-      ? this.api.update(project.id, input)
+      ? this.api.update(project.id, project.version, input)
       : this.api.create(input);
     request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
@@ -122,7 +122,11 @@ export class ProjectsPageComponent {
         this.saving.set(false);
         const failure = apiError(error);
         let message = failure.message;
-        if (error instanceof HttpErrorResponse && error.status === 404) {
+        if (isVersionConflict(error)) {
+          message = EDIT_CONFLICT_MESSAGE;
+          // Refresh the table only. Keep the open form and its original version.
+          this.refresh();
+        } else if (error instanceof HttpErrorResponse && error.status === 404) {
           message =
             "This project no longer exists. Your input is still here; the project list is being refreshed.";
           this.refresh();
@@ -157,7 +161,7 @@ export class ProjectsPageComponent {
     this.completing.set(true);
     this.completeError.set("");
     this.api
-      .update(project.id, { status: "completed" })
+      .update(project.id, project.version, { status: "completed" })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -176,6 +180,7 @@ export class ProjectsPageComponent {
             this.completeError.set(message);
           }
           this.toast.error(message);
+          if (isVersionConflict(error)) this.refresh();
         },
       });
   }
@@ -196,7 +201,7 @@ export class ProjectsPageComponent {
     this.deleting.set(true);
     this.deleteError.set("");
     this.api
-      .delete(project.id)
+      .delete(project.id, project.version)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -208,7 +213,10 @@ export class ProjectsPageComponent {
         error: (error) => {
           this.deleting.set(false);
           let message = apiError(error).message;
-          if (error instanceof HttpErrorResponse && error.status === 404) {
+          if (isVersionConflict(error)) {
+            this.deletingProject.set(null);
+            this.refresh();
+          } else if (error instanceof HttpErrorResponse && error.status === 404) {
             message =
               "This project has already been deleted. Close this dialog to see the refreshed list.";
             this.refresh();

@@ -1,6 +1,13 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { TimeoutError } from 'rxjs';
 
+export function isVersionConflict(error: unknown): boolean {
+  return error instanceof HttpErrorResponse && error.status === 409
+    && error.error?.code === 'VERSION_CONFLICT';
+}
+
+export const EDIT_CONFLICT_MESSAGE = 'Someone changed this record while you were editing. Your input is still here. Copy any changes you want to keep, then close and reopen Edit to load the latest version.';
+
 export function apiError(error: unknown): { message: string; fields: Record<string, string[]> } {
   if (error instanceof TimeoutError) {
     return { message: 'The request took too long. Refresh the list before retrying a save.', fields: {} };

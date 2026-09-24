@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { DatabaseService } from "../database/database.service";
-import { TaskInput } from "./task.dto";
+import { TaskInput, UpdateTaskDto } from "./task.dto";
+import { versionConflict } from '../common/version-conflict';
 const COLUMNS = `id, project_id AS "projectId", title, status, assignee_id AS "assigneeId", to_char(due_date, 'YYYY-MM-DD') AS "dueDate", version, created_at AS "createdAt", updated_at AS "updatedAt"`;
 @Injectable()
 export class TasksService {
@@ -38,9 +39,9 @@ export class TasksService {
     if (!row) throw new NotFoundException("Project not found");
     return row;
   }
-  async update(projectId: number, id: number, input: Partial<TaskInput>) {
+  async update(projectId: number, id: number, input: UpdateTaskDto) {
     const columns = { title: "title", status: "status", dueDate: "due_date" };
-    const values: unknown[] = [projectId, id];
+    const values: unknown[] = [projectId, id, input.version];
     const assignments: string[] = [];
     for (const field of Object.keys(columns) as (keyof TaskInput)[])
       if (Object.hasOwn(input, field)) {
@@ -49,22 +50,28 @@ export class TasksService {
       }
     const row = (
       await this.db.query(
-        `UPDATE tasks SET ${assignments.join(", ")} WHERE project_id=$1 AND id=$2 RETURNING ${COLUMNS}`,
+        `UPDATE tasks SET ${assignments.join(", ")} WHERE project_id=$1 AND id=$2 AND version=$3 RETURNING ${COLUMNS}`,
         values,
       )
     ).rows[0];
-    if (!row) throw new NotFoundException("Task not found in this project");
+    if (!row) {
+      await this.get(projectId, id);
+      versionConflict('Task');
+    }
     return row;
   }
-  async remove(projectId: number, id: number) {
+  async remove(projectId: number, id: number, version: number) {
     if (
       !(
-        await this.db.query("DELETE FROM tasks WHERE project_id=$1 AND id=$2", [
+        await this.db.query("DELETE FROM tasks WHERE project_id=$1 AND id=$2 AND version=$3", [
           projectId,
           id,
+          version,
         ])
       ).rowCount
-    )
-      throw new NotFoundException("Task not found in this project");
+    ) {
+      await this.get(projectId, id);
+      versionConflict('Task');
+    }
   }
 }

@@ -14,7 +14,7 @@ import {
 import { ProjectApiService } from "../../core/project-api.service";
 import { Project } from "../../core/project.model";
 import { Task, TaskInput, TaskApiService } from "../../core/task-api.service";
-import { apiError } from "../../core/api-error";
+import { apiError, EDIT_CONFLICT_MESSAGE, isVersionConflict } from "../../core/api-error";
 import { ToastService } from "../../shared/toast.service";
 import { ConfirmDialogComponent } from "../../shared/dialogs/confirm-dialog.component";
 import { TaskFormDialogComponent } from "../dialogs/task-form-dialog.component";
@@ -97,7 +97,7 @@ export class TasksPageComponent {
       task = this.completing();
     if (!project || !task || this.busy()) return;
     this.mutate(
-      this.api.update(project.id, task.id, { status: "completed" }),
+      this.api.update(project.id, task.id, task.version, { status: "completed" }),
       "Task completed.",
     );
   }
@@ -123,7 +123,7 @@ export class TasksPageComponent {
     const task = this.editing();
     this.mutate(
       task
-        ? this.api.update(p.id, task.id, input)
+        ? this.api.update(p.id, task.id, task.version, input)
         : this.api.create(p.id, input),
       "Task saved.",
     );
@@ -131,7 +131,7 @@ export class TasksPageComponent {
   remove(task: Task) {
     const p = this.project();
     if (p && !this.busy())
-      this.mutate(this.api.delete(p.id, task.id), "Task deleted.");
+      this.mutate(this.api.delete(p.id, task.id, task.version), "Task deleted.");
   }
   private mutate(request: import("rxjs").Observable<unknown>, message: string) {
     this.busy.set(true);
@@ -151,10 +151,20 @@ export class TasksPageComponent {
         },
         error: (e) => {
           const details = apiError(e);
-          const message =
+          let message =
             e.status === 404
               ? "This task or project no longer exists. Close this dialog and refresh."
               : details.message;
+          if (isVersionConflict(e)) {
+            if (this.formOpen()) {
+              message = EDIT_CONFLICT_MESSAGE;
+              // The editing record stays unchanged when the table reloads.
+            } else {
+              this.deleting.set(null);
+              this.completing.set(null);
+            }
+            this.reload.next();
+          }
           this.dialogError.set(message);
           this.toast.error(message);
         },

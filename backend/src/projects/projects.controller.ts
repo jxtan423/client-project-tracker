@@ -1,5 +1,6 @@
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
+import { VersionQueryPipe } from '../common/validation/version';
 import { CreateProjectDto, ProjectBodyPipe, ProjectIdPipe, UpdateProjectDto } from './project.dto';
 import { ProjectsService } from './projects.service';
 
@@ -29,7 +30,7 @@ export class ProjectsController {
 
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id', ProjectIdPipe) id: number, @CurrentUser() user: CurrentUser) {
-    return this.projects.remove(id, user);
+  remove(@Param('id', ProjectIdPipe) id: number, @Query('version', VersionQueryPipe) version: number, @CurrentUser() user: CurrentUser) {
+    return this.projects.remove(id, version, user);
   }
 }

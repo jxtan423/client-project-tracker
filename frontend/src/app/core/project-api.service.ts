@@ -15,8 +15,10 @@ export class ProjectApiService {
   list() { return this.http.get<Project[]>(this.url).pipe(timeout(15000)); }
   get(id: number) { return this.http.get<Project>(`${this.url}/${id}`).pipe(timeout(15000)); }
   create(input: ProjectInput) { return this.http.post<Project>(this.url, input).pipe(timeout(15000)); }
-  update(id: number, input: Partial<ProjectInput>) {
-    return this.http.patch<Project>(`${this.url}/${id}`, input).pipe(timeout(15000));
+  update(id: number, version: number, input: Partial<ProjectInput>) {
+    return this.http.patch<Project>(`${this.url}/${id}`, { ...input, version }).pipe(timeout(15000));
   }
-  delete(id: number) { return this.http.delete<void>(`${this.url}/${id}`).pipe(timeout(15000)); }
+  delete(id: number, version: number) {
+    return this.http.delete<void>(`${this.url}/${id}`, { params: { version } }).pipe(timeout(15000));
+  }
 }

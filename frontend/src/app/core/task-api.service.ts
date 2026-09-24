@@ -28,12 +28,12 @@ export class TaskApiService {
   create(p: number, input: TaskInput) {
     return this.http.post<Task>(this.url(p), input).pipe(timeout(15000));
   }
-  update(p: number, id: number, input: Partial<TaskInput>) {
+  update(p: number, id: number, version: number, input: Partial<TaskInput>) {
     return this.http
-      .patch<Task>(`${this.url(p)}/${id}`, input)
+      .patch<Task>(`${this.url(p)}/${id}`, { ...input, version })
       .pipe(timeout(15000));
   }
-  delete(p: number, id: number) {
-    return this.http.delete<void>(`${this.url(p)}/${id}`).pipe(timeout(15000));
+  delete(p: number, id: number, version: number) {
+    return this.http.delete<void>(`${this.url(p)}/${id}`, { params: { version } }).pipe(timeout(15000));
   }
 }

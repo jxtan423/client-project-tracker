@@ -1,4 +1,5 @@
 import { BadRequestException, PipeTransform } from "@nestjs/common";
+import { isVersion } from '../common/validation/version';
 
 export const PROJECT_STATUSES = [
   "planned",
@@ -14,10 +15,11 @@ export interface CreateProjectDto {
   startDate: string;
 }
 
-export type UpdateProjectDto = Partial<CreateProjectDto>;
+export type UpdateProjectDto = Partial<CreateProjectDto> & { version: number };
 
 export interface Project extends CreateProjectDto {
   id: number;
+  version: number;
   taskCount: number;
   createdBy: number | null;
   canDelete: boolean;
@@ -60,24 +62,29 @@ export function isCalendarDate(value: unknown): value is string {
 /** Validates and normalizes JSON at the HTTP boundary; services receive typed data. */
 export class ProjectBodyPipe implements PipeTransform<
   unknown,
-  UpdateProjectDto
+  Partial<UpdateProjectDto>
 > {
   constructor(private readonly partial: boolean = false) {}
 
-  transform(value: unknown): UpdateProjectDto {
+  transform(value: unknown): Partial<UpdateProjectDto> {
     if (!value || typeof value !== "object" || Array.isArray(value)) {
       return invalid({ body: ["Send a JSON object."] });
     }
 
     const input = value as Record<string, unknown>;
     const errors: Record<string, string[]> = Object.create(null);
-    const output: UpdateProjectDto = {};
+    const output: Partial<UpdateProjectDto> = {};
     const allowedFields = ["name", "clientName", "status", "startDate"];
+    if (this.partial) {
+      allowedFields.push('version');
+      if (!isVersion(input.version)) errors.version = ['Send the positive integer version of the record you opened.'];
+      else output.version = input.version;
+    }
     for (const key of Object.keys(input)) {
       if (!allowedFields.includes(key))
         errors[key] = ["This field is not allowed."];
     }
-    if (this.partial && Object.keys(input).length === 0) {
+    if (this.partial && !['name', 'clientName', 'status', 'startDate'].some(field => Object.hasOwn(input, field))) {
       errors.body = ["Provide at least one field to update."];
     }
 
